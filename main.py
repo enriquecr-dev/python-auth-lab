@@ -1,9 +1,7 @@
-from auth_lab.foundations.user_data import (
-    UserRecord,
-    count_users_by_role,
-    find_user_by_email,
-    get_active_users,
-    get_unique_roles,
+from auth_lab.foundations.user_data import UserRecord
+from auth_lab.foundations.user_service import (
+    safe_deactivate_user_by_email,
+    safe_find_user_by_email,
 )
 
 
@@ -18,29 +16,51 @@ def main() -> None:
         },
         {
             "id": 2,
-            "name": "Cristina",
-            "email": "cristi@example.com",
+            "name": "Ana",
+            "email": "ana@example.com",
             "is_active": True,
             "roles": ["editor"],
         },
-        {
-            "id": 3,
-            "name": "Luis",
-            "email": "luis@example.com",
-            "is_active": False,
-            "roles": ["viewer"],
-        },
     ]
 
-    active_users = get_active_users(users)
-    user = find_user_by_email(users, "enrique@example.com")
-    unique_roles = get_unique_roles(users)
-    role_counts = count_users_by_role(users)
+    lookup_result = safe_find_user_by_email(users, "enrique@example.com")
 
-    print(f"Active users: {len(active_users)}")
-    print(f"Found user: {user}")
-    print(f"Unique roles: {unique_roles}")
-    print(f"Role counts: {role_counts}")
+    print("Lookup result:")
+    print(f"Success: {lookup_result.success}")
+    print(f"Message: {lookup_result.message}")
+    print(f"User: {lookup_result.user}")
+    print(f"Errors: {lookup_result.errors}")
+
+    deactivation_result = safe_deactivate_user_by_email(
+        users,
+        "enrique@example.com",
+    )
+
+    print()
+    print("Deactivation result:")
+    print(f"Success: {deactivation_result.success}")
+    print(f"Message: {deactivation_result.message}")
+    print(f"Users: {deactivation_result.users}")
+    print(f"Errors: {deactivation_result.errors}")
+
+    invalid_result = safe_find_user_by_email(
+        users=[
+            {
+                "id": 1,
+                "name": "Bad User",
+                "email": True,
+                "is_active": True,
+                "roles": ["admin"],
+            }
+        ],
+        email="bad@example.com",
+    )
+
+    print()
+    print("Invalid data result:")
+    print(f"Success: {invalid_result.success}")
+    print(f"Message: {invalid_result.message}")
+    print(f"Errors: {invalid_result.errors}")
 
 
 if __name__ == "__main__":
